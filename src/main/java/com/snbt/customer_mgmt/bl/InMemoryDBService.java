@@ -28,6 +28,7 @@ public class InMemoryDBService implements DBService {
 
     private Map<UUID, Customer> inMemoryDB;
 
+    private File dbFile;
 
     public InMemoryDBService() {
         inMemoryDB = new ConcurrentHashMap<>();
@@ -41,9 +42,12 @@ public class InMemoryDBService implements DBService {
         }
     }
 
-    private Map<UUID, Customer> loadData() throws FileNotFoundException {
+    private Map<UUID, Customer> loadData() throws Exception {
         log.info("Loading DB from file");
-        JsonReader reader = new JsonReader(new FileReader("db.json"));
+        //for any exception we just init empty db
+        //noinspection ConstantConditions
+        dbFile = new File(this.getClass().getClassLoader().getResource("db.json").toURI());
+        JsonReader reader = new JsonReader(new FileReader(dbFile));
         Type customerType = new TypeToken<Map<UUID, Customer>>() {
         }.getType();
         Map<UUID, Customer> customerDb = new Gson().fromJson(reader, customerType);
@@ -108,7 +112,7 @@ public class InMemoryDBService implements DBService {
 
     private void flushData() throws IOException {
         log.debug("Flushing {} customer entries into db.json", inMemoryDB.size());
-        try (Writer writer = new FileWriter("db.json")) {
+        try (Writer writer = new FileWriter(dbFile)) {
             Gson gson = new GsonBuilder().create();
             gson.toJson(inMemoryDB, writer);
         }

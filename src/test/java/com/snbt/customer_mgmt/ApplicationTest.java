@@ -1,6 +1,7 @@
 package com.snbt.customer_mgmt;
 
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.JsonNode;
 import com.mashape.unirest.http.Unirest;
@@ -12,10 +13,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Type;
+import java.util.List;
 import java.util.UUID;
 
 import static com.snbt.customer_mgmt.ws.Web.*;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 
 
@@ -32,6 +36,8 @@ class ApplicationTest {
         String customerID = create();
 
         read(customerID);
+
+        readByCriteria();
 
         update(customerID);
 
@@ -62,7 +68,27 @@ class ApplicationTest {
         Customer retrieved = new Gson().fromJson(readResponse.getBody(), Customer.class);
 
         assertThat("unsuccessful READ", readResponse.getStatus(), is(Response.Status.SUCCESS));
-        assertThat("Customer read not as expected", retrieved, is(expected));
+        assertThat("Customer read (by id) not as expected", retrieved, is(expected));
+    }
+
+    private void readByCriteria() throws UnirestException {
+        Customer expected = new Gson().fromJson(artVandelay(), Customer.class);
+        HttpResponse<JsonNode> jsonResponse = Unirest.get(SERVICE_URL)
+                .header(ACCEPT_HEADER, JSON_TYPE)
+                .queryString(QueryParams.FIRST_NAME, "Art")
+                .queryString(QueryParams.CITY, "Tel Aviv")
+                .queryString(QueryParams.AGE_FROM, "40")
+                .queryString(QueryParams.AGE_TO, "60")
+                .asJson();
+
+        Response readResponse = new Gson().fromJson(jsonResponse.getBody().toString(), Response.class);
+
+        Type customerListType = new TypeToken<List<Customer>>(){}.getType();
+        List<Customer> retrieved = new Gson().fromJson(readResponse.getBody(), customerListType);
+
+        assertThat("unsuccessful READ", readResponse.getStatus(), is(Response.Status.SUCCESS));
+        assertThat("Customer read (by criteria) should return a single entity", retrieved, hasSize(1));
+        assertThat("Customer read (by criteria) not as expected", retrieved.get(0), is(expected));
     }
 
     private void update(String id) throws UnirestException {
@@ -110,7 +136,7 @@ class ApplicationTest {
                 "\"phoneNumber\": \"054-2345678\"" +
                 "}," +
                 "\"dateOfBirth\": {" +
-                "\"year\": 1980," +
+                "\"year\": 1970," +
                 "\"month\": 3," +
                 "\"day\": 4" +
                 "}," +

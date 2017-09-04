@@ -79,17 +79,17 @@ public class CustomerController {
         if (request.queryMap().hasKeys()) {
             for (String param : request.queryParams()) {
                 switch (param) {
-                    case "firstName":
-                        criteria = criteria.and(firstNameIs(request.queryParams("firstName")));
+                    case Web.QueryParams.FIRST_NAME:
+                        criteria = criteria.and(firstNameIs(request.queryParams(Web.QueryParams.FIRST_NAME)));
                         break;
-                    case "city":
-                        criteria = criteria.and(cityIs(request.queryParams("city")));
+                    case Web.QueryParams.CITY:
+                        criteria = criteria.and(cityIs(request.queryParams(Web.QueryParams.CITY)));
                         break;
-                    case "ageFrom":
-                        criteria = criteria.and(ageFrom(request.queryParams("ageFrom")));
+                    case Web.QueryParams.AGE_FROM:
+                        criteria = criteria.and(ageFrom(request.queryParams(Web.QueryParams.AGE_FROM)));
                         break;
-                    case "ageTo":
-                        criteria = criteria.and(ageTo(request.queryParams("ageTo")));
+                    case Web.QueryParams.AGE_TO:
+                        criteria = criteria.and(ageTo(request.queryParams(Web.QueryParams.AGE_TO)));
                 }
             }
         }
