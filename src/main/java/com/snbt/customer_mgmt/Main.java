@@ -35,7 +35,7 @@ public class Main {
                 Application.stop();
                 mainThread.join();
             } catch (InterruptedException e) {
-                mainThread.interrupt();
+                Thread.currentThread().interrupt();
             }
         }));
     }

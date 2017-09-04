@@ -1,7 +1,17 @@
 group 'com.snbt'
 version '1.0-SNAPSHOT'
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0-RC3'
+    }
+}
+
 apply plugin: 'java'
+apply plugin: 'org.junit.platform.gradle.plugin'
 
 sourceCompatibility = 1.8
 
@@ -25,4 +35,8 @@ dependencies {
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.0.0-RC3'
     testCompile group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.0.0-RC3'
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'
+}
+
+junitPlatform {
+    details 'tree'
 }

@@ -37,7 +37,7 @@ class ApplicationTest {
 
         read(customerID);
 
-        readByCriteria();
+        readByCriteria(customerID);
 
         update(customerID);
 
@@ -59,6 +59,7 @@ class ApplicationTest {
 
     private void read(String id) throws UnirestException {
         Customer expected = new Gson().fromJson(artVandelay(), Customer.class);
+        expected.setId(UUID.fromString(id));
         HttpResponse<JsonNode> jsonResponse = Unirest.get(SERVICE_URL + "/{:id}")
                 .header(ACCEPT_HEADER, JSON_TYPE)
                 .routeParam(":id", id)
@@ -71,8 +72,9 @@ class ApplicationTest {
         assertThat("Customer read (by id) not as expected", retrieved, is(expected));
     }
 
-    private void readByCriteria() throws UnirestException {
+    private void readByCriteria(String expectedId) throws UnirestException {
         Customer expected = new Gson().fromJson(artVandelay(), Customer.class);
+        expected.setId(UUID.fromString(expectedId));
         HttpResponse<JsonNode> jsonResponse = Unirest.get(SERVICE_URL)
                 .header(ACCEPT_HEADER, JSON_TYPE)
                 .queryString(QueryParams.FIRST_NAME, "Art")
@@ -122,7 +124,6 @@ class ApplicationTest {
 
     private static String artVandelay() {
         return "{" +
-                "\"id\": \"5c17a5d8-5e90-4089-adf4-2bf5dfb35095\"," +
                 "\"firstName\": \"Art\"," +
                 "\"lastName\": \"Vandelay\"," +
                 "\"address\": {" +
