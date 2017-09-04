@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.snbt.customer_mgmt.bl.DBService;
 import com.snbt.customer_mgmt.domain.Customer;
 import spark.Request;
+import spark.Spark;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,25 +13,25 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import static com.snbt.customer_mgmt.bl.BuiltInCriteria.*;
+import static com.snbt.customer_mgmt.ws.Web.JSON_TYPE;
+import static com.snbt.customer_mgmt.ws.Web.SERVICE_PATH;
 import static spark.Spark.*;
 
 public class CustomerController {
 
     public static void go(DBService dbService) {
 
-        get("/hello", (request, response) -> "world");
-
-        get("/customers", (request, response) -> {
-            response.type("application/json");
+        get(SERVICE_PATH, (request, response) -> {
+            response.type(JSON_TYPE);
             Predicate<Customer> criteria = resolveQueryParams(request);
-            List<Customer> allCustomers = dbService.getBy(criteria);
-            JsonElement allCustomersJson = new Gson().toJsonTree(allCustomers);
+            List<Customer> fetchedCustomers = dbService.getBy(criteria);
+            JsonElement fetchedCustomersJson = new Gson().toJsonTree(fetchedCustomers);
             return new Gson()
-                    .toJson(new Response(Response.Status.SUCCESS, allCustomersJson));
+                    .toJson(new Response(Response.Status.SUCCESS, fetchedCustomersJson));
         });
 
-        get("/customers/:id", (request, response) -> {
-            response.type("application/json");
+        get(SERVICE_PATH + "/:id", (request, response) -> {
+            response.type(JSON_TYPE);
             Optional<Customer> customersWithId = dbService.getById(request.params(":id"));
             if (customersWithId.isPresent()) {
                 JsonElement customersWithIdJson = new Gson().toJsonTree(customersWithId.get());
@@ -41,16 +42,17 @@ public class CustomerController {
                     .toJson(new Response(Response.Status.SUCCESS, "Customer with this id was not found"));
         });
 
-        post("/customers", (request, response) -> {
-            response.type("application/json");
+        post(SERVICE_PATH, (request, response) -> {
+            response.type(JSON_TYPE);
             Customer customer = new Gson().fromJson(request.body(), Customer.class);
             UUID uuidOfCreated = dbService.create(customer);
+            JsonElement uuidJson = new Gson().toJsonTree(uuidOfCreated);
             return new Gson()
-                    .toJson(new Response(Response.Status.SUCCESS, "Created customer with Id: " + uuidOfCreated));
+                    .toJson(new Response(Response.Status.SUCCESS, uuidJson));
         });
 
-        put("/customers/:id", (request, response) -> {
-            response.type("application/json");
+        put(SERVICE_PATH + "/:id", (request, response) -> {
+            response.type(JSON_TYPE);
             Customer toUpdate = new Gson().fromJson(request.body(), Customer.class);
             Optional<Customer> updatedCustomer = dbService.update(toUpdate);
 
@@ -64,8 +66,8 @@ public class CustomerController {
                             .toJson("Customer with this id was not found")));
         });
 
-        delete("/customers/:id", (request, response) -> {
-            response.type("application/json");
+        delete(SERVICE_PATH + "/:id", (request, response) -> {
+            response.type(JSON_TYPE);
             dbService.delete(request.params(":id"));
             return new Gson().toJson(
                     new Response(Response.Status.SUCCESS, "Customer deleted"));
@@ -74,18 +76,28 @@ public class CustomerController {
 
     private static Predicate<Customer> resolveQueryParams(Request request) {
         Predicate<Customer> criteria = everything();
-        if (!request.queryParams(":firstName").isEmpty()) {
-            criteria.and(firstNameIs(request.queryParams(":firstName")));
+        if (request.queryMap().hasKeys()) {
+            for (String param : request.queryParams()) {
+                switch (param) {
+                    case "firstName":
+                        criteria = criteria.and(firstNameIs(request.queryParams("firstName")));
+                        break;
+                    case "city":
+                        criteria = criteria.and(cityIs(request.queryParams("city")));
+                        break;
+                    case "ageFrom":
+                        criteria = criteria.and(ageFrom(request.queryParams("ageFrom")));
+                        break;
+                    case "ageTo":
+                        criteria = criteria.and(ageTo(request.queryParams("ageTo")));
+                }
+            }
         }
-        if (!request.queryParams(":city").isEmpty()) {
-            criteria.and(cityIs(request.queryParams(":city")));
-        }
-        if (!request.queryParams(":ageFrom").isEmpty()) {
-            criteria.and(ageFrom(request.queryParams(":ageFrom")));
-        }
-        if (!request.queryParams(":ageTo").isEmpty()) {
-            criteria.and(ageTo(request.queryParams(":ageTo")));
-        }
-        return null;
+
+        return criteria;
+    }
+
+    public static void stop() {
+        Spark.stop();
     }
 }

@@ -1,0 +1,62 @@
+{
+  "a3ff28c2-ba62-4b71-a680-ab4c663816af": {
+    "id": "a3ff28c2-ba62-4b71-a680-ab4c663816af",
+    "firstName": "Art",
+    "lastName": "Vandelay",
+    "address": {
+      "streetName": "Dafna",
+      "houseNum": 43,
+      "city": "Tel Aviv",
+      "zip": 44234
+    },
+    "contactInformation": {
+      "emailAddress": "artv@vandelay-industries.com",
+      "phoneNumber": "054-2345678"
+    },
+    "dateOfBirth": {
+      "year": 1980,
+      "month": 3,
+      "day": 4
+    },
+    "creditCard": {
+      "number": "1234-5678-1111-2222",
+      "expiry": {
+        "year": 2020,
+        "month": 9,
+        "day": 3
+      },
+      "cvv": 888
+    },
+    "drivingLicenseNumber": 567890009
+  },
+  "55f9024b-b745-4302-b3d5-27ddcc6c62d6": {
+    "id": "55f9024b-b745-4302-b3d5-27ddcc6c62d6",
+    "firstName": "Kal",
+    "lastName": "Varnsen",
+    "address": {
+      "streetName": "Houston",
+      "houseNum": 182,
+      "city": "New York",
+      "zip": 19872
+    },
+    "contactInformation": {
+      "emailAddress": "kalv@vandelay-industries.com",
+      "phoneNumber": "054-9876543"
+    },
+    "dateOfBirth": {
+      "year": 1967,
+      "month": 9,
+      "day": 10
+    },
+    "creditCard": {
+      "number": "1234-5678-4444-6666",
+      "expiry": {
+        "year": 2021,
+        "month": 5,
+        "day": 6
+      },
+      "cvv": 883
+    },
+    "drivingLicenseNumber": 567890008
+  }
+}
