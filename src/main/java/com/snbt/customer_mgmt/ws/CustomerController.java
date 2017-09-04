@@ -54,6 +54,7 @@ public class CustomerController {
         put(SERVICE_PATH + "/:id", (request, response) -> {
             response.type(JSON_TYPE);
             Customer toUpdate = new Gson().fromJson(request.body(), Customer.class);
+            toUpdate.setId(UUID.fromString(request.params(":id")));
             Optional<Customer> updatedCustomer = dbService.update(toUpdate);
 
             if (updatedCustomer.isPresent()) {
