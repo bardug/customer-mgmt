@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 import java.util.UUID;
 
-public class Customer {
+public class Customer implements Entity {
     private UUID id;
     private String firstName;
     private String lastName;

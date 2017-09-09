@@ -3,6 +3,7 @@ package com.snbt.customer_mgmt.ws;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.snbt.customer_mgmt.bl.DBService;
+import com.snbt.customer_mgmt.bl.InMemoryCriteria;
 import com.snbt.customer_mgmt.domain.Customer;
 import spark.Request;
 import spark.Spark;
@@ -12,18 +13,18 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Predicate;
 
-import static com.snbt.customer_mgmt.bl.BuiltInCriteria.*;
+import static com.snbt.customer_mgmt.bl.InMemoryCriteria.Predicates.*;
 import static com.snbt.customer_mgmt.ws.Web.JSON_TYPE;
 import static com.snbt.customer_mgmt.ws.Web.SERVICE_PATH;
 import static spark.Spark.*;
 
 public class CustomerController {
 
-    public static void go(DBService dbService) {
+    public static void go(DBService<Customer, InMemoryCriteria> dbService) {
 
         get(SERVICE_PATH, (request, response) -> {
             response.type(JSON_TYPE);
-            Predicate<Customer> criteria = resolveQueryParams(request);
+            InMemoryCriteria criteria = resolveQueryParams(request);
             List<Customer> fetchedCustomers = dbService.getBy(criteria);
             JsonElement fetchedCustomersJson = new Gson().toJsonTree(fetchedCustomers);
             return new Gson()
@@ -75,27 +76,27 @@ public class CustomerController {
         });
     }
 
-    private static Predicate<Customer> resolveQueryParams(Request request) {
-        Predicate<Customer> criteria = everything();
+    private static InMemoryCriteria resolveQueryParams(Request request) {
+        Predicate<Customer> predicate = everything();
         if (request.queryMap().hasKeys()) {
             for (String param : request.queryParams()) {
                 switch (param) {
                     case Web.QueryParams.FIRST_NAME:
-                        criteria = criteria.and(firstNameIs(request.queryParams(Web.QueryParams.FIRST_NAME)));
+                        predicate = predicate.and(firstNameIs(request.queryParams(Web.QueryParams.FIRST_NAME)));
                         break;
                     case Web.QueryParams.CITY:
-                        criteria = criteria.and(cityIs(request.queryParams(Web.QueryParams.CITY)));
+                        predicate = predicate.and(cityIs(request.queryParams(Web.QueryParams.CITY)));
                         break;
                     case Web.QueryParams.AGE_FROM:
-                        criteria = criteria.and(ageFrom(request.queryParams(Web.QueryParams.AGE_FROM)));
+                        predicate = predicate.and(ageFrom(request.queryParams(Web.QueryParams.AGE_FROM)));
                         break;
                     case Web.QueryParams.AGE_TO:
-                        criteria = criteria.and(ageTo(request.queryParams(Web.QueryParams.AGE_TO)));
+                        predicate = predicate.and(ageTo(request.queryParams(Web.QueryParams.AGE_TO)));
                 }
             }
         }
 
-        return criteria;
+        return InMemoryCriteria.from(predicate);
     }
 
     public static void stop() {

@@ -15,14 +15,13 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * In-memory customer DB implementation that maintains all entries in java map.
  * The map is initialized from db.json file during startup, and flushed during shutdown (poor man's persistence)
  */
-public class InMemoryDBService implements DBService {
+public class InMemoryDBService implements DBService<Customer, InMemoryCriteria> {
 
     private static final Logger log = LoggerFactory.getLogger(InMemoryDBService.class);
 
@@ -72,10 +71,10 @@ public class InMemoryDBService implements DBService {
     }
 
     @Override
-    public List<Customer> getBy(Predicate<? super Customer> predicate) {
+    public List<Customer> getBy(InMemoryCriteria criteria) {
         log.debug("Fetching customers by criteria");
         List<Customer> fetched = inMemoryDB.values().stream()
-                .filter(predicate)
+                .filter(criteria.predicate())
                 .collect(Collectors.toList());
         log.debug("{} customers fetched", fetched.size());
         return fetched;
